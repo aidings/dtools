@@ -1,0 +1,18 @@
+
+TARGET: demo
+CC: g++
+AR: ar
+incs_root: 
+  - ./include
+srcs_root:
+  - ./source
+libs_root:
+#  - ./lib # define the root path of library(.a or .so)
+libs:
+#  - ncnn # remove lib prefix and .a or .so suffix
+
+CXXFLAG:
+  - -std=c++11
+LFLAGS:
+  - -O3 -Wall #-O3:Release -g3:Debug
+
