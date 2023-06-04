@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+import os
+import shutil
+import argparse
+import yaml
+from dtools import data_root
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest='command', help='model')
+    parser.add_argument('-c', '--conf', help='conf file', default='./conf.yaml')
+    parser.add_argument('-j', '--jthread', default=-1, type=int, help='input compile number thread')
+
+    sub_main = subparsers.add_parser('main', help='create a executable file')
+    sub_lib = subparsers.add_parser('lib', help='create a static library file')
+    sub_so  = subparsers.add_parser('so', help='create a dynamic library file')
+    sub_clean = subparsers.add_parser('clean', help='clean the target and temp file')
+    sub_show = subparsers.add_parser('show', help='debug makefile')
+
+    args = parser.parse_args()
+    if not os.path.exists(args.conf):
+        shutil.copyfile(os.path.join(data_root, 'conf.yaml'), args.conf)
+        print("1. you can edit the conf.yaml and run dmake xxx")
+        print("2. you can run dmake -c path/to/conf.yaml xxx ")
+    else:
+        assert args.command in ['main', 'lib', 'so', 'clean', 'show'], 'command error: {}'.format(args.command)
+        with open(args.conf, 'r') as f:
+            conf = yaml.load(f, yaml.FullLoader)
+        
+        mkfile = os.path.join(data_root, 'makefile')
+        target = conf['target']
+
+        # cc compile
+        CC = conf['CC']
+
+        # get cpp's file paths
+        srcs_files = []
+        if args.command == 'main':
+            if conf['srcs_root']:
+                srcs_files += conf['srcs_root']
+            if conf['main_root']:
+                srcs_files.append(conf['main_root'])
+        else:
+            if conf['srcs_root']:
+                srcs_files = conf['srcs_root']
+
+            if args.command in ['lib', 'so']:
+                target = 'lib'+conf['target']
+        
+        srcs_files = ':'.join(srcs_files)
+
+        # preprocess head paths
+        incs_root = ':'.join(['-I'+h for h in conf['incs_root']])
+        
+        cmd = f'make -f {mkfile} TARGET={target} {args.command} SRCS_ROOT={srcs_files} INCS_ROOT={incs_root} CC={CC}'
+
+        # preprocess lib paths
+        if conf['libs_root']:
+            libs_paths = ':'.join(['-L'+l for l in conf['libs_root']])
+            cmd += f' libs_root={libs_paths}'
+
+        # preprocess lib files
+        if conf['libs']:
+            libs = ':'.join(['-l'+l for l in conf['libs']])
+            cmd += f' libs={libs}'
+        
+        # preprocess lflags
+        lflags = ':'.join(conf['LFLAGS'].split())
+        cmd += f' lflags={lflags}'
+
+        cxxflags = ':'.join(conf['CXXFLAGS'].split())
+        cmd += f' cxxflags={cxxflags}'
+
+        if args.jthread > 0:
+            cmd += f' -j{args.jthread}'
+        
+        os.system(cmd)
+ 

@@ -10,8 +10,8 @@ from setuptools import find_packages
 
 
 setup(name='dtools',  # 包名
-      version='0.0.2',  # 版本号
-      description='ding's tools',
+      version='0.0.1',  # 版本号
+      description='ding\'s tools',
       long_description='',
       author='zhifeng.ding',
       author_email='zhifeng.ding@hqu.edu.cn',
@@ -38,5 +38,5 @@ setup(name='dtools',  # 包名
       packages=find_packages(where='src', exclude='', include=('*')),  # 必填
       package_dir={'': 'src'},  # 必填
       include_package_data=True,
-      scripts=[''],
+      scripts=['./scripts/dmake'],
       )

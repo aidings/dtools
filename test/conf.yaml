@@ -1,17 +1,17 @@
-target: add
+target: main
 CC: g++
 AR: ar
 incs_root:
   - ./include
 srcs_root:
-  # - ./source
-  # - ./other
+  - ./source
+  - ./other
 main_root: ./
 libs_root:
-  - ./
+# - ./
 #  - ./lib # define the root path of library(.a or .so)
 libs:
-  - add
+#  - add
 #  - ncnn # remove lib prefix and .a or .so suffix
 
 CXXFLAGS: -std=c++11
